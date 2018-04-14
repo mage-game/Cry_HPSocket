@@ -1,0 +1,2 @@
+easyloggingpp-9.96.4 https://github.com/muflihun/easyloggingpp/releases/tag/v9.96.4
+HP-Socket-5.2.1 https://github.com/ldcsaa/HP-Socket/releases/tag/v5.2.1

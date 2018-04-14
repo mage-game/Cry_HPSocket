@@ -1,0 +1,64 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TcpPackServer", "TcpPackServer\TcpPackServer.vcxproj", "{178A5138-9D46-4A02-AE4B-8B6581BD4396}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Debug-SSL|x64 = Debug-SSL|x64
+		Debug-SSL|x86 = Debug-SSL|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+		Release-SSL|x64 = Release-SSL|x64
+		Release-SSL|x86 = Release-SSL|x86
+		uDebug|x64 = uDebug|x64
+		uDebug|x86 = uDebug|x86
+		uDebug-SSL|x64 = uDebug-SSL|x64
+		uDebug-SSL|x86 = uDebug-SSL|x86
+		uRelease|x64 = uRelease|x64
+		uRelease|x86 = uRelease|x86
+		uRelease-SSL|x64 = uRelease-SSL|x64
+		uRelease-SSL|x86 = uRelease-SSL|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.Debug|x64.ActiveCfg = Debug|x64
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.Debug|x64.Build.0 = Debug|x64
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.Debug|x86.ActiveCfg = Debug|Win32
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.Debug|x86.Build.0 = Debug|Win32
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.Debug-SSL|x64.ActiveCfg = Debug|x64
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.Debug-SSL|x64.Build.0 = Debug|x64
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.Debug-SSL|x86.ActiveCfg = Debug|Win32
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.Debug-SSL|x86.Build.0 = Debug|Win32
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.Release|x64.ActiveCfg = Release|x64
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.Release|x64.Build.0 = Release|x64
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.Release|x86.ActiveCfg = Release|Win32
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.Release|x86.Build.0 = Release|Win32
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.Release-SSL|x64.ActiveCfg = Release|x64
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.Release-SSL|x64.Build.0 = Release|x64
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.Release-SSL|x86.ActiveCfg = Release|Win32
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.Release-SSL|x86.Build.0 = Release|Win32
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.uDebug|x64.ActiveCfg = Debug|x64
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.uDebug|x64.Build.0 = Debug|x64
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.uDebug|x86.ActiveCfg = Debug|Win32
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.uDebug|x86.Build.0 = Debug|Win32
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.uDebug-SSL|x64.ActiveCfg = Debug|x64
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.uDebug-SSL|x64.Build.0 = Debug|x64
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.uDebug-SSL|x86.ActiveCfg = Debug|Win32
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.uDebug-SSL|x86.Build.0 = Debug|Win32
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.uRelease|x64.ActiveCfg = Release|x64
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.uRelease|x64.Build.0 = Release|x64
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.uRelease|x86.ActiveCfg = Release|Win32
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.uRelease|x86.Build.0 = Release|Win32
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.uRelease-SSL|x64.ActiveCfg = Release|x64
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.uRelease-SSL|x64.Build.0 = Release|x64
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.uRelease-SSL|x86.ActiveCfg = Release|Win32
+		{178A5138-9D46-4A02-AE4B-8B6581BD4396}.uRelease-SSL|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

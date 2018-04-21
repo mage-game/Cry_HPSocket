@@ -1,2 +1,2 @@
 # CryHPSocket
-A new server was created for Cryengine-5.5 by HPSocket.
+A new server and client were created for Cryengine-5.5 by HPSocket.

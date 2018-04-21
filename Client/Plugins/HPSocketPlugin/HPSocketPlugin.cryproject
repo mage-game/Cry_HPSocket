@@ -1,0 +1,15 @@
+{
+    "content": {
+        "code": [
+            "Code"
+        ]
+    },
+    "info": {
+        "name": "VZPlugin"
+    },
+    "require": {
+        "engine": "engine-5.5"
+    },
+    "type": "",
+    "version": 1
+}

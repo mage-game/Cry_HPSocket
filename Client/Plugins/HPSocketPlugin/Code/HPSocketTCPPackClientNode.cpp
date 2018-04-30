@@ -21,7 +21,7 @@ namespace HPSocket
     public:
         CTCPPackClientNode(SActivationInfo* pActInfo)
         {
-			m_pTCPPackClientWrapper = mEnv->pTCPPackClientWrapper.get();
+			m_TCPPackClientWrapper = mEnv->pTCPPackClientWrapper.get();
         }
 
         virtual void GetMemoryUsage(ICrySizer* s) const
@@ -59,12 +59,12 @@ namespace HPSocket
 					if (IConsole* pConsole = gEnv->pConsole)
 					{
 						float interval = pConsole->GetCVar("hp_socket_interval")->GetFVal();
-						m_pTCPPackClientWrapper->SetDataFrameInterval(interval);
+						m_TCPPackClientWrapper->SetDataFrameInterval(interval);
 
 						string ip = pConsole->GetCVar("hp_socket_ip")->GetString();
 						int port = pConsole->GetCVar("hp_socket_port")->GetIVal();
 						bool async = GetPortBool(pActInfo, EIP_Async);
-						if (!m_pTCPPackClientWrapper->Start(ip.c_str(), (USHORT)port, async))
+						if (!m_TCPPackClientWrapper->Start(ip.c_str(), (USHORT)port, async))
 						{
 							LogError("Start client failed");
 							return;
@@ -77,7 +77,7 @@ namespace HPSocket
 				}
 				else if (IsPortActive(pActInfo, EIP_Stop))
 				{
-					if (!m_pTCPPackClientWrapper->Stop())
+					if (!m_TCPPackClientWrapper->Stop())
 					{
 						LogError("Stop client failed");
 						return;
@@ -89,7 +89,7 @@ namespace HPSocket
 			}
 			else if (event == eFE_Update)
 			{
-				if (m_pTCPPackClientWrapper->IsFinishHandShake())
+				if (m_TCPPackClientWrapper->IsFinishHandShake())
 				{
 					pActInfo->pGraph->SetRegularlyUpdated(pActInfo->myID, false);
 					ActivateOutput(pActInfo, EOP_Started, SFlowSystemVoid());
@@ -97,7 +97,7 @@ namespace HPSocket
 			}
         }
     private:
-		CTCPPackClientWrapper* m_pTCPPackClientWrapper;
+		TCPPackClientWrapper* m_TCPPackClientWrapper;
     };      
 
     REGISTER_FLOW_NODE("HP-Socket:TCPPackClient", CTCPPackClientNode);

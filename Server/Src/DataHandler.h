@@ -13,7 +13,7 @@ public:
 
 	~DataHandler();
 
-	void HandleData(CONNID dwConnID, BYTE* pData, uint32_t iLength);
+	void HandleData(uint64_t connID, uint8_t* data, uint32_t len);
 
 	void SetDataFrameInterval(int interval= 33);  
 
@@ -21,8 +21,8 @@ private:
 	void RegisterAllActions();
 
 private:
-    std::shared_ptr<MsgHandlerAction> m_MsgHandlerActionPtr;
-	std::shared_ptr<MsgLogicDirectHandler> m_MsgLogicDirectHandlerPtr;
-	std::shared_ptr<MsgLogicPeriodicalHandler> m_MsgLogicPeriodicalHandlerPtr;
+    std::shared_ptr<MsgHandlerAction> m_msgHandlerAction;
+	std::shared_ptr<MsgLogicDirectHandler> m_msgLogicDirectHandler;
+	std::shared_ptr<MsgLogicPeriodicalHandler> m_msgLogicPeriodicalHandler;
 };
 

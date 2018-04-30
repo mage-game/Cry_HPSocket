@@ -27,7 +27,7 @@ namespace HPSocket
 	{
 		if (gEnv->IsDedicated())
 		{
-			return false;
+			return false;	 
 		}
 
 		gEnv->pSystem->GetISystemEventDispatcher()->RegisterListener(this, "CPlugin_VirZoom");	  		
@@ -122,24 +122,9 @@ namespace HPSocket
 		return mEnv->pSerializerContainer->GetSerializableListener(type);
 	}
 
-	void CPlugin_HP_Socket::RegisterUnserializeListener(IClientListener* pClientListener, int type)
+	bool CPlugin_HP_Socket::SerializeSinglePkgDirectly(Serializer& serializer)
 	{
-		mEnv->pSerializerContainer->RegisterUnserializeListener(pClientListener, type);
-	}
-
-	void CPlugin_HP_Socket::RemoveUnserializeListener(int type)
-	{
-		mEnv->pSerializerContainer->RemoveUnserializeListener(type);
-	}
-
-	IClientListener* CPlugin_HP_Socket::GetUnserializableListener(int type)
-	{
-		return mEnv->pSerializerContainer->GetUnserializableListener(type);
-	}
-
-	void CPlugin_HP_Socket::SerializeSinglePkgDirectly(Serializer& serializer)
-	{
-		mEnv->pTCPPackClientWrapper->SerializeSinglePkgDirectly(serializer);
+		return mEnv->pTCPPackClientWrapper->SerializeSinglePkgDirectly(serializer);
 	}
 
 	void CPlugin_HP_Socket::RegisterCVars()

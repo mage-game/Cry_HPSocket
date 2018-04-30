@@ -1,15 +1,14 @@
 #pragma once
 
-#include <CryGame/IGameFramework.h>
 #include "HPSocketTCPPackClientService.h" 
 
 namespace HPSocket
 {
-	class CTCPPackClientWrapper
+	class TCPPackClientWrapper
 	{
 	public:
-		CTCPPackClientWrapper();
-		virtual ~CTCPPackClientWrapper();
+		TCPPackClientWrapper();
+		virtual ~TCPPackClientWrapper();
 	public:
 		const bool IsStarted() const;
 		const bool IsFinishHandShake() const;
@@ -19,12 +18,12 @@ namespace HPSocket
 
 		void SetDataFrameInterval(float interval);
 
-		void SerializeSinglePkgDirectly(Serializer& serializer);
+		bool SerializeSinglePkgDirectly(Serializer& serializer);
 
-		void SerializeAllPkgPeriodically(float frameTime);
+		bool SerializeAllPkgPeriodically(float frameTime);
 	private:
-		float m_CurrTime = 0.0f;
-		float m_DataFrameInterval = 33.33f;
-		std::shared_ptr<TCPPackClientService> m_TCPPackClientPtr;
+		float m_currTime = 0.0f;
+		float m_dataFrameInterval = 33.33f;
+		std::shared_ptr<TCPPackClientService> m_TCPPackClient;
 	};
 }

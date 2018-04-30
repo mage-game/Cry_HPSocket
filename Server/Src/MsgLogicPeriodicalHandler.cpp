@@ -4,7 +4,7 @@
 MsgLogicPeriodicalHandler::MsgLogicPeriodicalHandler(HP_Object pSender)
 	:MsgLogicHandlerBase(pSender)
 {
-	m_DataPoolPtr = std::make_shared<DataPool>();
+	m_dataPoolPtr = std::make_shared<DataPool>();
 
 	m_hThread = (HANDLE)_beginthreadex(nullptr, 0, WorkerThreadProc, (LPVOID)this, 0, nullptr);
 }
@@ -16,7 +16,7 @@ MsgLogicPeriodicalHandler::~MsgLogicPeriodicalHandler()
 
 void MsgLogicPeriodicalHandler::SetDataFrameInterval(int interval /*= 33*/)
 {
-	m_DataFrameInterval = interval;
+	m_dataFrameInterval = interval;
 }
 
 void MsgLogicPeriodicalHandler::SyncDataPeriodically(const BYTE* pData, int iLength)
@@ -28,7 +28,7 @@ void MsgLogicPeriodicalHandler::PutDataToBuffer(const BYTE* pData, int iLength)
 {
 	CCriSecLock locallock(m_CS);
 
-	m_DataPoolPtr->PutData(pData, iLength);
+	m_dataPoolPtr->PutData(pData, iLength);
 }
 
 void MsgLogicPeriodicalHandler::SendBufferData()
@@ -36,7 +36,7 @@ void MsgLogicPeriodicalHandler::SendBufferData()
 	CCriSecLock locallock(m_CS);
 
 	CBufferPtr dataBufferPtr;
-	m_DataPoolPtr->GetAllData(dataBufferPtr);
+	m_dataPoolPtr->GetAllData(dataBufferPtr);
 	if (dataBufferPtr.Size() > 0)
 	{
 		std::vector<CONNID> connIDs = GetAllConnIDs();
@@ -46,15 +46,15 @@ void MsgLogicPeriodicalHandler::SendBufferData()
 
 uint32_t WINAPI MsgLogicPeriodicalHandler::WorkerThreadProc(LPVOID pv)
 {
-	MsgLogicPeriodicalHandler* msgLogicPeriodicalHandler = (MsgLogicPeriodicalHandler*)pv;
+	MsgLogicPeriodicalHandler* handler = (MsgLogicPeriodicalHandler*)pv;
 
-	LOG(INFO) << "$ Start to SyncData,the dataframe Interval is " << msgLogicPeriodicalHandler->m_DataFrameInterval;
+	LOG(INFO) << "$ Start to SyncData,the dataframe Interval is " << handler->m_dataFrameInterval;
 
-	while (msgLogicPeriodicalHandler->m_DataHandleThreadStart)
+	while (handler->m_dataHandleThreadStart)
 	{
-		msgLogicPeriodicalHandler->SendBufferData();
+		handler->SendBufferData();
 
-		Sleep(msgLogicPeriodicalHandler->m_DataFrameInterval);
+		Sleep(handler->m_dataFrameInterval);
 	}
 	return 0;
 }

@@ -19,11 +19,11 @@ private:
 	static En_HP_HandleResult __stdcall OnClose(HP_Server pSender, HP_CONNID dwConnID, En_HP_SocketOperation enOperation, int iErrorCode);
 	static En_HP_HandleResult __stdcall OnShutdown(HP_Server pSender);
 private:
-	static ServerService* m_ServerService;
+	static ServerService* s_serverService;
 
-	HP_TcpPackServer m_pServer;
-	HP_TcpServerListener m_pListener;
+	HP_TcpPackServer m_server;
+	HP_TcpServerListener m_listener;
 
-	std::shared_ptr<DataHandler> m_DataHandlerPtr;
+	std::shared_ptr<DataHandler> m_dataHandler;
 };
 

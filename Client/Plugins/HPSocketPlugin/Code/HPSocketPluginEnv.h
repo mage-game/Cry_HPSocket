@@ -18,13 +18,13 @@ namespace HPSocket
 		void Init()
 		{
 			pSerializerContainer = std::make_shared<SerializerContainer>();
-			pTCPPackClientWrapper = std::make_shared<CTCPPackClientWrapper>();
+			pTCPPackClientWrapper = std::make_shared<TCPPackClientWrapper>();
 		}
 		// Pointers
 		std::shared_ptr<SerializerContainer> pSerializerContainer;
-		std::shared_ptr<CTCPPackClientWrapper> pTCPPackClientWrapper;
+		std::shared_ptr<TCPPackClientWrapper> pTCPPackClientWrapper;
 
-		// Console variables
+		// Console variables	
 		int DebugLog = 0;
 	};
 

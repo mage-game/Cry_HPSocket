@@ -18,7 +18,7 @@ public:
 
 	void SendToClientByConnIDs(const uint8_t* pData, int iLength, std::vector<CONNID>& connIDs);
 protected:
-	HP_TcpPackServer m_Server;
+	HP_TcpPackServer m_server;
 };	
 
 

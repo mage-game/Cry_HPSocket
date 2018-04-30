@@ -3,53 +3,54 @@
 
 namespace HPSocket
 {
-	CTCPPackClientWrapper::CTCPPackClientWrapper()
+	TCPPackClientWrapper::TCPPackClientWrapper()
 	{
-		m_TCPPackClientPtr = std::make_shared<TCPPackClientService>();
+		m_TCPPackClient = std::make_shared<TCPPackClientService>();
 	}
 
-	CTCPPackClientWrapper::~CTCPPackClientWrapper()
+	TCPPackClientWrapper::~TCPPackClientWrapper()
 	{
 		Stop();
 	}
 
-	const bool CTCPPackClientWrapper::IsStarted() const
+	const bool TCPPackClientWrapper::IsStarted() const
     {
-        return m_TCPPackClientPtr->IsStarted();
+        return m_TCPPackClient->IsStarted();
     }
 
-	const bool CTCPPackClientWrapper::IsFinishHandShake() const
+	const bool TCPPackClientWrapper::IsFinishHandShake() const
 	{
-		return m_TCPPackClientPtr->IsFinishHandShake();
+		return m_TCPPackClient->IsFinishHandShake();
 	}
 
-	bool CTCPPackClientWrapper::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect)
+	bool TCPPackClientWrapper::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect)
     {
-        return m_TCPPackClientPtr->Start(lpszRemoteAddress,usPort,bAsyncConnect);
+        return m_TCPPackClient->Start(lpszRemoteAddress,usPort,bAsyncConnect);
     }
 
-    bool CTCPPackClientWrapper::Stop()
+    bool TCPPackClientWrapper::Stop()
     {
-        return m_TCPPackClientPtr->Stop();
+        return m_TCPPackClient->Stop();
     }
 
-    void CTCPPackClientWrapper::SetDataFrameInterval(float interval)
+    void TCPPackClientWrapper::SetDataFrameInterval(float interval)
     {
-        m_DataFrameInterval = interval;
+        m_dataFrameInterval = interval;
     }
 
-    void CTCPPackClientWrapper::SerializeSinglePkgDirectly(Serializer& serializer)
+    bool TCPPackClientWrapper::SerializeSinglePkgDirectly(Serializer& serializer)
     {
-		m_TCPPackClientPtr->SerializeSinglePkg(serializer);
+		return m_TCPPackClient->SerializeSinglePkg(serializer);
     }
 
-    void CTCPPackClientWrapper::SerializeAllPkgPeriodically(float frameTime)
+    bool TCPPackClientWrapper::SerializeAllPkgPeriodically(float frameTime)
     {
-        m_CurrTime += frameTime*1000.0f;
-        if (m_CurrTime > m_DataFrameInterval)
+        m_currTime += frameTime*1000.0f;
+        if (m_currTime > m_dataFrameInterval)
         {
-            m_CurrTime = 0.0f;
-            m_TCPPackClientPtr->SerializeAllPkgs();
+            m_currTime = 0.0f;
+            return m_TCPPackClient->SerializeAllPkgs();
         }
+		return false;
     }
 }

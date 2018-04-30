@@ -10,18 +10,18 @@ namespace HPSocket
     public:
 		void SetPkgBufferData(const uint8_t* pData, uint32_t len)
 		{
-			m_BufferPtr.Realloc(len);
-			memcpy(m_BufferPtr.Ptr(), pData, len);
+			m_buffer.Realloc(len);
+			memcpy(m_buffer.Ptr(), pData, len);
 		}
 
 		uint8_t* GetPkgBufferData()
 		{
-			return m_BufferPtr.Ptr();
+			return m_buffer.Ptr();
 		}
 
 		size_t GetPkgBufferSize()
 		{
-			return m_BufferPtr.Size();
+			return m_buffer.Size();
 		}
 
 		void Serialize(uint32_t bodyType)
@@ -31,9 +31,9 @@ namespace HPSocket
 			header.bodyLen = 0;
 
 			uint32_t headerLen = sizeof(PkgHeader);
-			m_BufferPtr.Realloc(headerLen + header.bodyLen);
+			m_buffer.Realloc(headerLen + header.bodyLen);
 
-			memcpy(m_BufferPtr.Ptr(), (uint8_t*)&header, headerLen);
+			memcpy(m_buffer.Ptr(), (uint8_t*)&header, headerLen);
 		}
 
 		void Serialize(uint32_t bodyType, uint32_t bodyLen, const uint8_t* pBodyData)
@@ -43,10 +43,10 @@ namespace HPSocket
 			header.bodyLen = bodyLen;
 
 			uint32_t headerLen = sizeof(PkgHeader);
-			m_BufferPtr.Realloc(headerLen + header.bodyLen);
+			m_buffer.Realloc(headerLen + header.bodyLen);
 
-			memcpy(m_BufferPtr.Ptr(), (uint8_t*)&header, headerLen);
-			memcpy(m_BufferPtr.Ptr() + headerLen, pBodyData, header.bodyLen);
+			memcpy(m_buffer.Ptr(), (uint8_t*)&header, headerLen);
+			memcpy(m_buffer.Ptr() + headerLen, pBodyData, header.bodyLen);
 		}
 
         template <typename T>
@@ -57,34 +57,34 @@ namespace HPSocket
 			header.bodyLen = sizeof(T);
 
 			uint32_t headerLen = sizeof(PkgHeader);
-			m_BufferPtr.Realloc(headerLen + header.bodyLen);
+			m_buffer.Realloc(headerLen + header.bodyLen);
 
-			memcpy(m_BufferPtr.Ptr(), (uint8_t*)&header, headerLen);
-			memcpy(m_BufferPtr.Ptr() + headerLen, (uint8_t*)&bodyData, header.bodyLen);
+			memcpy(m_buffer.Ptr(), (uint8_t*)&header, headerLen);
+			memcpy(m_buffer.Ptr() + headerLen, (uint8_t*)&bodyData, header.bodyLen);
 		}
 
 		uint64_t Unserialize()
 		{
-			PkgHeader* pHeader = (PkgHeader*)m_BufferPtr.Ptr();
-			return pHeader->connID;
+			PkgHeader* header = (PkgHeader*)m_buffer.Ptr();
+			return header->connID;
 		}
 
 		uint64_t Unserialize(uint8_t*& pData, uint32_t& len)
 		{
-			PkgHeader* pHeader = (PkgHeader*)m_BufferPtr.Ptr();
-			pData = pHeader->body;
-			len = pHeader->bodyLen;
-			return pHeader->connID;
+			PkgHeader* header = (PkgHeader*)m_buffer.Ptr();
+			pData = header->body;
+			len = header->bodyLen;
+			return header->connID;
 		}
 
         template <typename T>
 		uint64_t Unserialize(T*& pData)
 		{
-			PkgHeader* pHeader = (PkgHeader*)m_BufferPtr.Ptr();
-			pData = (T*)pHeader->body;
-			return pHeader->connID;
+			PkgHeader* header = (PkgHeader*)m_buffer.Ptr();
+			pData = (T*)header->body;
+			return header->connID;
 		}
     private:
-        CBufferPtr m_BufferPtr;
+        CBufferPtr m_buffer;
     };
 }

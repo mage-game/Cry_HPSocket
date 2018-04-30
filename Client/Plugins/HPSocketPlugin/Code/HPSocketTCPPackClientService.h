@@ -15,9 +15,11 @@ namespace HPSocket
 
         bool Stop();          
         
-        void SerializeSinglePkg(Serializer& serializer);
+        bool SerializeSinglePkg(Serializer& serializer);
 
-        void SerializeAllPkgs();
+        bool SerializeAllPkgs();
+
+		bool UnserializeAllPkgs(const uint8_t* pData, const uint32_t iLength);
  
         const bool IsStarted() const;   
 
@@ -32,13 +34,13 @@ namespace HPSocket
         static En_HP_HandleResult __stdcall OnClose(HP_Client pClient, HP_CONNID dwConnID, En_HP_SocketOperation enOperation, int iErrorCode);
 
     private:         
-        static TCPPackClientService* m_TCPPackClientService;
+        static TCPPackClientService* s_TCPPackClientService;
 
-        HP_TcpPackClient m_pClient;
-        HP_TcpClientListener m_pListener;
+        HP_TcpPackClient m_client;
+        HP_TcpClientListener m_listener;
                                                     
-        bool m_Start = false;
-		bool m_FinishHandShake = false;
+        bool m_isStarted = false;
+		bool m_isFinishHandShake = false;
     };
 }
 

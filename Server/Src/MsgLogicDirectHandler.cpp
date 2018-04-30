@@ -10,56 +10,90 @@ MsgLogicDirectHandler::~MsgLogicDirectHandler()
 {
 }
 
+void MsgLogicDirectHandler::RecordPlayerLogin(uint64_t connID, NetPlayerInfo &player)
+{
+	m_playerMap[connID] = player;
+}
+
 void MsgLogicDirectHandler::SyncDataToAllClientDirectly(const uint8_t* pData, int iLength)
 {
-	std::vector<CONNID> connIDs = GetAllConnIDs();
+	std::vector<uint64_t> connIDs = GetAllConnIDs();
 
 	SendToClientByConnIDs(pData, iLength, connIDs);
 }
 
-void MsgLogicDirectHandler::SyncDataExceptConnIdDirectly(const uint8_t* pData, int iLength, CONNID connID)
+void MsgLogicDirectHandler::SyncDataExceptConnIdDirectly(uint64_t connID, const uint8_t* pData, int iLength)
 {
-	std::vector<CONNID> connIDs = GetPartConnIDs(connID);
+	std::vector<uint64_t> connIDs = GetPartConnIDs(connID);
 
 	SendToClientByConnIDs(pData, iLength, connIDs);
-}														 
+}
 
-void MsgLogicDirectHandler::SyncDataJustConnIdDirectly(const uint8_t* pData, int iLength, CONNID connID)
+void MsgLogicDirectHandler::SyncDataJustConnIdDirectly(uint64_t connID, const uint8_t* pData, int iLength)
 {
-	std::vector<CONNID> connIDs;
+	std::vector<uint64_t> connIDs;
 	connIDs.push_back(connID);
 
 	SendToClientByConnIDs(pData, iLength, connIDs);
 }
 
-void MsgLogicDirectHandler::GenerateAutoPkgBuffer(CBufferPtr& pkgBufferPtr, const PkgHeader& header, const uint8_t* data /*= nullptr*/)
+bool MsgLogicDirectHandler::GenerateLocalPlayerLoginInfoPkg(uint64_t connID, uint8_t* data, uint32_t len, CBufferPtr& pkgBufferPtr)
 {
-	uint32_t headerLen = sizeof(PkgHeader);
-	uint32_t bodyLen = header.bodyLen;
+	PkgHeader header;
+	header.connID = connID;
+	header.bodyType = LOCAL_PLAYER_LOGIN;
+	header.bodyLen = 0;
 
-	pkgBufferPtr.Realloc(headerLen + bodyLen);
+	//PkgBodyLocalPlayerLogin body;
 
-	memcpy(pkgBufferPtr.Ptr(), (uint8_t*)&header, headerLen);
-	if (data != nullptr)
-	{
-		memcpy(pkgBufferPtr.Ptr() + headerLen, data, bodyLen);
-	}
+	pkgBufferPtr.Cat((uint8_t*)&header, sizeof(PkgHeader));
+	//pkgBufferPtr.Cat((uint8_t*)&body, sizeof(PkgBodyLocalPlayerLogin));
+
+	return true;
 }
 
-void MsgLogicDirectHandler::GenerateAllPlayerInfoPkg(CONNID connID, CBufferPtr& pkgBufferPtr, std::vector<CONNID> connIDs)
-{			 	
-	CBufferPtr bodyBufferPtr(connIDs.size() * sizeof(PkgBodyPlayers::Player));
-	for (DWORD i = 0; i < connIDs.size(); i++)
+bool MsgLogicDirectHandler::GenerateNetPlayerLoginInfoPkg(uint64_t connID, uint8_t* data, uint32_t len, CBufferPtr& pkgBufferPtr)
+{
+	auto it = m_playerMap.find(connID);
+	if (it != m_playerMap.end())
 	{
-		PkgBodyPlayers::Player player;
-		player.connID = connIDs[i];
-		memcpy(bodyBufferPtr.Ptr() + i * sizeof(PkgBodyPlayers::Player), (uint8_t*)&player, sizeof(PkgBodyPlayers::Player));
+		PkgHeader header;
+		header.connID = connID;
+		header.bodyType = NET_PLAYER_LOGIN;
+		header.bodyLen = sizeof(PkgBodyNetPlayerLogin);
+
+		PkgBodyNetPlayerLogin body;
+		body.player = it->second;
+
+		pkgBufferPtr.Cat((uint8_t*)&header, sizeof(PkgHeader));
+		pkgBufferPtr.Cat((uint8_t*)&body, sizeof(PkgBodyNetPlayerLogin));
+
+		return true;
+	}
+	return false;
+}					
+
+bool MsgLogicDirectHandler::GenerateAllPlayerInfoPkg(uint64_t connID, uint8_t* data, uint32_t len, CBufferPtr& pkgBufferPtr)
+{
+	CBufferPtr bodyBufferPtr;
+	std::vector<CONNID> connIDs = GetPartConnIDs(connID);
+	for (auto id : connIDs)
+	{
+		auto it = m_playerMap.find(id);
+		if (it != m_playerMap.end())
+		{
+			NetPlayerInfo player = it->second;
+			bodyBufferPtr.Cat((uint8_t*)&player, sizeof(NetPlayerInfo));
+		}
 	}
 
 	PkgHeader header;
 	header.connID = connID;
-	header.bodyType = ALL_PLAYER_INFO;
+	header.bodyType = ALL_NET_PLAYER_INFO;
 	header.bodyLen = (uint32_t)bodyBufferPtr.Size();
 
-	GenerateAutoPkgBuffer(pkgBufferPtr, header, bodyBufferPtr.Ptr());
+	pkgBufferPtr.Cat((uint8_t*)&header, sizeof(PkgHeader));
+	pkgBufferPtr.Cat(bodyBufferPtr);
+
+	return true;
 }

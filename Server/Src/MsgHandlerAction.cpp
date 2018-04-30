@@ -3,20 +3,20 @@
 
 MsgHandlerAction::~MsgHandlerAction()
 {
-    m_ActionCallbackMap.clear();
+    m_actionCallbackMap.clear();
 }
 
 void MsgHandlerAction::RegisterAction(uint32_t type, TActionCallback callback)
 {
-    m_ActionCallbackMap[type] = callback;
+    m_actionCallbackMap[type] = callback;
 }
 
-void MsgHandlerAction::ExecuteAction(uint32_t type, CONNID dwConnID, uint8_t* pData, uint32_t iLength)
+void MsgHandlerAction::ExecuteAction(uint32_t type, uint64_t connID, uint8_t* data, uint32_t len)
 {
-    auto it = m_ActionCallbackMap.find(type);
-    if (it != m_ActionCallbackMap.end())
+    auto it = m_actionCallbackMap.find(type);
+    if (it != m_actionCallbackMap.end())
     {
         auto func = it->second;
-        func(dwConnID, pData, iLength);
+        func(connID, data, len);
     }
 }

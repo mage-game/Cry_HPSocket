@@ -8,12 +8,12 @@ DataPool::DataPool()
 {	   
 	Reset();
 
-	m_DataBlocks.resize(DEFAULT_BLOCK_NUM);
+	m_dataBlocks.resize(DEFAULT_BLOCK_NUM);
 	for (int i = 0; i < DEFAULT_BLOCK_NUM; i++)
 	{
-		BYTE* dataChunk = new BYTE[m_MaxBlockSize];
-        memset(dataChunk, 0, m_MaxBlockSize);
-		m_DataBlocks[i] = dataChunk;
+		BYTE* dataChunk = new BYTE[m_maxBlockSize];
+        memset(dataChunk, 0, m_maxBlockSize);
+		m_dataBlocks[i] = dataChunk;
 	}
 }
 
@@ -21,52 +21,52 @@ DataPool::~DataPool()
 {
 	for (int i = 0; i < DEFAULT_BLOCK_NUM; i++)
 	{
-		SAFE_DELETE_ARRAY(m_DataBlocks[i]);
+		SAFE_DELETE_ARRAY(m_dataBlocks[i]);
 	}
-	m_DataBlocks.clear();
+	m_dataBlocks.clear();
 }
 
 void DataPool::PutData(const uint8_t* data, uint32_t size)
 {
-	if (size <= m_CurBlockFreeSize)
+	if (size <= m_curBlockFreeSize)
 	{
-		memcpy(m_DataBlocks[m_CurEmptyBlockIndex] + m_CurBlockDataPos, data, size);
-		m_CurBlockDataPos += size;
-		m_CurBlockFreeSize -= size;
+		memcpy(m_dataBlocks[m_curEmptyBlockIndex] + m_curBlockDataPos, data, size);
+		m_curBlockDataPos += size;
+		m_curBlockFreeSize -= size;
 	}
 	else
 	{
-		memcpy(m_DataBlocks[m_CurEmptyBlockIndex] + m_CurBlockDataPos, data, m_CurBlockFreeSize);
+		memcpy(m_dataBlocks[m_curEmptyBlockIndex] + m_curBlockDataPos, data, m_curBlockFreeSize);
 
-		memcpy(m_DataBlocks[++m_CurEmptyBlockIndex], data + m_CurBlockFreeSize, size - m_CurBlockFreeSize);
-		m_CurBlockDataPos = size - m_CurBlockFreeSize;
-		m_CurBlockFreeSize = m_MaxBlockSize - m_CurBlockDataPos;
+		memcpy(m_dataBlocks[++m_curEmptyBlockIndex], data + m_curBlockFreeSize, size - m_curBlockFreeSize);
+		m_curBlockDataPos = size - m_curBlockFreeSize;
+		m_curBlockFreeSize = m_maxBlockSize - m_curBlockDataPos;
 	}
 }
 
 void DataPool::GetAllData(CBufferPtr& dataBufferPtr)
 {   
-    DWORD dataSize = m_CurEmptyBlockIndex*m_MaxBlockSize + m_CurBlockDataPos;
+    DWORD dataSize = m_curEmptyBlockIndex*m_maxBlockSize + m_curBlockDataPos;
     dataBufferPtr.Realloc(dataSize);
 
 	DWORD size = 0;
-	for (int i = 0; i < m_CurEmptyBlockIndex; i++)
+	for (int i = 0; i < m_curEmptyBlockIndex; i++)
 	{                
-		memcpy(dataBufferPtr.Ptr() + size, m_DataBlocks[i], m_MaxBlockSize);
-        memset(m_DataBlocks[i], 0, m_MaxBlockSize);
-        size += m_MaxBlockSize;
+		memcpy(dataBufferPtr.Ptr() + size, m_dataBlocks[i], m_maxBlockSize);
+        memset(m_dataBlocks[i], 0, m_maxBlockSize);
+        size += m_maxBlockSize;
 	}
-	memcpy(dataBufferPtr.Ptr() + size, m_DataBlocks[m_CurEmptyBlockIndex], m_CurBlockDataPos);
-    memset(m_DataBlocks[m_CurEmptyBlockIndex], 0, m_CurBlockDataPos);
-    size += m_CurBlockDataPos;
+	memcpy(dataBufferPtr.Ptr() + size, m_dataBlocks[m_curEmptyBlockIndex], m_curBlockDataPos);
+    memset(m_dataBlocks[m_curEmptyBlockIndex], 0, m_curBlockDataPos);
+    size += m_curBlockDataPos;
 
 	Reset();
 }
 
 void DataPool::Reset()
 {
-	m_CurEmptyBlockIndex = 0;
-	m_CurBlockDataPos = 0;
-	m_MaxBlockSize = MAX_BLOCK_SIZE;
-	m_CurBlockFreeSize = m_MaxBlockSize;
+	m_curEmptyBlockIndex = 0;
+	m_curBlockDataPos = 0;
+	m_maxBlockSize = MAX_BLOCK_SIZE;
+	m_curBlockFreeSize = m_maxBlockSize;
 }

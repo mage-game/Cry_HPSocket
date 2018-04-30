@@ -1,4 +1,5 @@
 #pragma once
+#include <unordered_map>
 #include "MsgLogicHandlerBase.h"
 
 class MsgLogicDirectHandler :public MsgLogicHandlerBase
@@ -8,13 +9,20 @@ public:
 
 	virtual ~MsgLogicDirectHandler();
 
-	void GenerateAutoPkgBuffer(CBufferPtr& pkgBufferPtr, const PkgHeader& header, const uint8_t* data = nullptr);
-
-	void GenerateAllPlayerInfoPkg(CONNID connID, CBufferPtr& pkgBufferPtr, std::vector<CONNID> connIDs);
+	void RecordPlayerLogin(uint64_t connID, NetPlayerInfo &player);
 
 	void SyncDataToAllClientDirectly(const uint8_t* pData, int iLength);
 
-	void SyncDataExceptConnIdDirectly(const uint8_t* pData, int iLength, CONNID connID);
-									   
-	void SyncDataJustConnIdDirectly(const uint8_t* pData, int iLength, CONNID connID);
+	void SyncDataExceptConnIdDirectly(uint64_t connID, const uint8_t* pData, int iLength);
+
+	void SyncDataJustConnIdDirectly(uint64_t connID, const uint8_t* pData, int iLength);
+
+	bool GenerateLocalPlayerLoginInfoPkg(uint64_t connID, uint8_t* data, uint32_t len, CBufferPtr& pkgBufferPtr);
+
+	bool GenerateNetPlayerLoginInfoPkg(uint64_t connID, uint8_t* data, uint32_t len, CBufferPtr& pkgBufferPtr);
+
+	bool GenerateAllPlayerInfoPkg(uint64_t connID, uint8_t* data, uint32_t len, CBufferPtr& pkgBufferPtr);
+
+private:
+	std::unordered_map<uint64_t, NetPlayerInfo> m_playerMap;
 };

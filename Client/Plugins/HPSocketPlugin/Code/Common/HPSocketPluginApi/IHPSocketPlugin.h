@@ -15,10 +15,6 @@ namespace HPSocket
 		virtual void RemoveSerializeListener(int type) = 0;
 		virtual IClientListener* GetSerializableListener(int type) = 0;
 
-		virtual void RegisterUnserializeListener(IClientListener* pClientListener, int type) = 0;
-		virtual void RemoveUnserializeListener(int type) = 0;
-		virtual IClientListener* GetUnserializableListener(int type) = 0;
-
-		virtual void SerializeSinglePkgDirectly(Serializer& serializer) = 0;
+		virtual bool SerializeSinglePkgDirectly(Serializer& serializer) = 0;
 	};	 
 }

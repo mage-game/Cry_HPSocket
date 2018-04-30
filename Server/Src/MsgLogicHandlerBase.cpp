@@ -2,7 +2,7 @@
 #include "MsgLogicHandlerBase.h"
 		  
 MsgLogicHandlerBase::MsgLogicHandlerBase(HP_Object pSender)
-	:m_Server(pSender)
+	:m_server(pSender)
 {		   
 }
 
@@ -16,13 +16,13 @@ std::vector<CONNID> MsgLogicHandlerBase::GetAllConnIDs()
 	std::vector<CONNID> connIDs;
 	do
 	{
-		connCount = ::HP_Server_GetConnectionCount(m_Server);
+		connCount = ::HP_Server_GetConnectionCount(m_server);
 		if (connCount == 0)
 		{
 			break;
 		}
 		connIDs.resize(connCount);
-		if (::HP_Server_GetAllConnectionIDs(m_Server, &connIDs[0], &connCount))
+		if (::HP_Server_GetAllConnectionIDs(m_server, &connIDs[0], &connCount))
 		{
 			break;
 		}
@@ -46,7 +46,7 @@ void MsgLogicHandlerBase::SendToClientByConnIDs(const uint8_t* pData, int iLengt
 {
 	for (auto connID : connIDs)
 	{
-		if (!::HP_Server_Send(m_Server, connID, pData, iLength))
+		if (!::HP_Server_Send(m_server, connID, pData, iLength))
 		{
 			LOG(ERROR) << "> Send faild, ConnID " << connID;
 		}

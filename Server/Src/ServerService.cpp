@@ -4,65 +4,65 @@
 #define DEFAULT_ADDRESS _T("0.0.0.0")
 #define DEFAULT_PORT 5555
 
-ServerService* ServerService::m_ServerService = nullptr;
+ServerService* ServerService::s_serverService = nullptr;
 
 ServerService::ServerService()
 {
-	m_ServerService = this;
+	s_serverService = this;
 	// 创建监听器对象
-	m_pListener = ::Create_HP_TcpPackServerListener();
+	m_listener = ::Create_HP_TcpPackServerListener();
 	// 创建 Socket 对象
-	m_pServer = ::Create_HP_TcpPackServer(m_pListener);
+	m_server = ::Create_HP_TcpPackServer(m_listener);
 	// 设置 Socket 监听器回调函数
-	::HP_Set_FN_Server_OnPrepareListen(m_pListener, OnPrepareListen);
-	::HP_Set_FN_Server_OnAccept(m_pListener, OnAccept);
-	::HP_Set_FN_Server_OnSend(m_pListener, OnSend);
-	::HP_Set_FN_Server_OnReceive(m_pListener, OnReceive);
-	::HP_Set_FN_Server_OnClose(m_pListener, OnClose);
-	::HP_Set_FN_Server_OnShutdown(m_pListener, OnShutdown);
+	::HP_Set_FN_Server_OnPrepareListen(m_listener, OnPrepareListen);
+	::HP_Set_FN_Server_OnAccept(m_listener, OnAccept);
+	::HP_Set_FN_Server_OnSend(m_listener, OnSend);
+	::HP_Set_FN_Server_OnReceive(m_listener, OnReceive);
+	::HP_Set_FN_Server_OnClose(m_listener, OnClose);
+	::HP_Set_FN_Server_OnShutdown(m_listener, OnShutdown);
 
-	m_DataHandlerPtr = std::make_shared<DataHandler>(m_pServer);
-	m_DataHandlerPtr->SetDataFrameInterval(33);
+	m_dataHandler = std::make_shared<DataHandler>(m_server);
+	m_dataHandler->SetDataFrameInterval(33);
 }                         
 
 ServerService::~ServerService()
 {
 	Stop();
 	// 销毁 Socket 对象
-	::Destroy_HP_TcpPackServer(m_pServer);
+	::Destroy_HP_TcpPackServer(m_server);
 	// 销毁监听器对象
-	::Destroy_HP_TcpServerListener(m_pListener);
+	::Destroy_HP_TcpServerListener(m_listener);
 }
 
 void ServerService::Start()
 {
-	::HP_Server_SetSendPolicy(m_pServer, SP_DIRECT);
-	::HP_Server_SetWorkerThreadCount(m_pServer, 10);
-	::HP_Server_SetMaxConnectionCount(m_pServer, 1000);
+	::HP_Server_SetSendPolicy(m_server, SP_DIRECT);
+	::HP_Server_SetWorkerThreadCount(m_server, 10);
+	::HP_Server_SetMaxConnectionCount(m_server, 1000);
 
-	::HP_Server_SetFreeSocketObjPool(m_pServer, 500);
-	::HP_Server_SetFreeSocketObjHold(m_pServer, 1500);
-	::HP_Server_SetFreeBufferObjPool(m_pServer, 2000);
-	::HP_Server_SetFreeBufferObjHold(m_pServer, 6000);
-	::HP_TcpServer_SetSocketListenQueue(m_pServer, 2000);
-	::HP_TcpServer_SetAcceptSocketCount(m_pServer, 2000);
+	::HP_Server_SetFreeSocketObjPool(m_server, 500);
+	::HP_Server_SetFreeSocketObjHold(m_server, 1500);
+	::HP_Server_SetFreeBufferObjPool(m_server, 2000);
+	::HP_Server_SetFreeBufferObjHold(m_server, 6000);
+	::HP_TcpServer_SetSocketListenQueue(m_server, 2000);
+	::HP_TcpServer_SetAcceptSocketCount(m_server, 2000);
 
-	::HP_TcpPackServer_SetMaxPackSize(m_pServer, 0x01FFF);
-	::HP_TcpPackServer_SetPackHeaderFlag(m_pServer, 0x169);
+	::HP_TcpPackServer_SetMaxPackSize(m_server, 0x01FFF);
+	::HP_TcpPackServer_SetPackHeaderFlag(m_server, 0x169);
                                  
-	if (::HP_Server_Start(m_pServer, DEFAULT_ADDRESS, DEFAULT_PORT))
+	if (::HP_Server_Start(m_server, DEFAULT_ADDRESS, DEFAULT_PORT))
 	{
 		LOG(INFO) << "$ Server Start OK";
 	}
 	else
 	{
-		LOG(ERROR) << "$ Server Start Fail" << ",code " + ::HP_Server_GetLastError(m_pServer);
+		LOG(ERROR) << "$ Server Start Fail" << ",code " + ::HP_Server_GetLastError(m_server);
 	}
 }
 
 void ServerService::Stop()
 {
-	if (::HP_Server_Stop(m_pServer))
+	if (::HP_Server_Stop(m_server))
 	{
 		LOG(INFO) << "$ Server Stop";
 	}
@@ -108,7 +108,7 @@ En_HP_HandleResult __stdcall ServerService::OnSend(HP_Server pSender, HP_CONNID 
 
 En_HP_HandleResult __stdcall ServerService::OnReceive(HP_Server pSender, HP_CONNID dwConnID, const BYTE* pData, int iLength)
 {
-	m_ServerService->m_DataHandlerPtr->HandleData(dwConnID, (BYTE*)pData, iLength);
+	s_serverService->m_dataHandler->HandleData(dwConnID, (uint8_t*)pData, iLength);
 
 	return HR_OK;
 }

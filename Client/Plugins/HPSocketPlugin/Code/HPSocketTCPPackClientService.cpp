@@ -6,48 +6,48 @@
 
 namespace HPSocket
 {
-    TCPPackClientService* TCPPackClientService::m_TCPPackClientService = nullptr;
+    TCPPackClientService* TCPPackClientService::s_TCPPackClientService = nullptr;
 
     TCPPackClientService::TCPPackClientService()
     {
-        m_TCPPackClientService = this;
-        m_pListener = ::Create_HP_TcpClientListener();
-        m_pClient = ::Create_HP_TcpPackClient(m_pListener);
+        s_TCPPackClientService = this;
+        m_listener = ::Create_HP_TcpClientListener();
+        m_client = ::Create_HP_TcpPackClient(m_listener);
 
-        ::HP_Set_FN_Client_OnConnect(m_pListener, OnConnect);
-		::HP_Set_FN_Client_OnHandShake(m_pListener, OnHandShake);
-        ::HP_Set_FN_Client_OnSend(m_pListener, OnSend);
-        ::HP_Set_FN_Client_OnReceive(m_pListener, OnReceive);
-        ::HP_Set_FN_Client_OnClose(m_pListener, OnClose);
+        ::HP_Set_FN_Client_OnConnect(m_listener, OnConnect);
+		::HP_Set_FN_Client_OnHandShake(m_listener, OnHandShake);
+        ::HP_Set_FN_Client_OnSend(m_listener, OnSend);
+        ::HP_Set_FN_Client_OnReceive(m_listener, OnReceive);
+        ::HP_Set_FN_Client_OnClose(m_listener, OnClose);
     }
 
     TCPPackClientService::~TCPPackClientService()
     {
 		Stop();
 
-        ::Destroy_HP_TcpPackClient(m_pClient);
-        ::Destroy_HP_TcpClientListener(m_pListener);
+        ::Destroy_HP_TcpPackClient(m_client);
+        ::Destroy_HP_TcpClientListener(m_listener);
     }
 
     bool TCPPackClientService::Start(LPCTSTR lpszRemoteAddress, USHORT usPort, BOOL bAsyncConnect)
     {
-        if (!m_Start)
+        if (!m_isStarted)
         {
-            ::HP_TcpPackServer_SetMaxPackSize(m_pClient, 0x01FFF);
-            ::HP_TcpPackServer_SetPackHeaderFlag(m_pClient, 0x169);
+            ::HP_TcpPackServer_SetMaxPackSize(m_client, 0x01FFF);
+            ::HP_TcpPackServer_SetPackHeaderFlag(m_client, 0x169);
 
-            if (::HP_Client_Start(m_pClient, lpszRemoteAddress, usPort, bAsyncConnect))
+            if (::HP_Client_Start(m_client, lpszRemoteAddress, usPort, bAsyncConnect))
             {
-                m_Start = true;
+                m_isStarted = true;
 				LogAlways("Start HP-Socket client Successed");
 
                 return true;
             }
             else
             {
-                m_Start = false;
+                m_isStarted = false;
 				LogError("Start HP-Socket client Failed! error code %d,error desc %s",
-                    ::HP_Client_GetLastError(m_pClient), HP_Client_GetLastErrorDesc(m_pClient));
+                    ::HP_Client_GetLastError(m_client), HP_Client_GetLastErrorDesc(m_client));
             }
         }
         return false;
@@ -55,30 +55,31 @@ namespace HPSocket
 
     bool TCPPackClientService::Stop()
     {
-        if (m_Start)
+        if (m_isStarted)
         {
-            ::HP_Client_Stop(m_pClient);
-            m_Start = false;
-			m_FinishHandShake = false;
+            ::HP_Client_Stop(m_client);
+            m_isStarted = false;
+			m_isFinishHandShake = false;
         }
         return true;
     }
 
-    void TCPPackClientService::SerializeSinglePkg(Serializer& serializer)
+    bool TCPPackClientService::SerializeSinglePkg(Serializer& serializer)
     {
-		if (m_Start)
+		if (m_isStarted)
 		{
 			BYTE* data = serializer.GetPkgBufferData();
 			DWORD size = serializer.GetPkgBufferSize();
-			Send(data, size);
+			return Send(data, size);
 		}
+		return false;
     }
 
     bool TCPPackClientService::Send(const BYTE* pData, DWORD size)
     {
-        if (m_Start)
+        if (m_isStarted)
         {
-            BOOL sendFlag = ::HP_Client_Send(m_pClient, pData, size);
+            BOOL sendFlag = ::HP_Client_Send(m_client, pData, size);
             if (sendFlag)
             {
                 LogDebug("HP-Socket client successed! length %d", size);
@@ -93,31 +94,66 @@ namespace HPSocket
         return false;
     }
 
-    void TCPPackClientService::SerializeAllPkgs()
-    {
-        if (m_Start)
+    bool TCPPackClientService::SerializeAllPkgs()
+    {			
+        if (m_isStarted)
         {
+			bool isSendSucc = true;
+
 			auto serializableListeners = mEnv->pSerializerContainer->GetAllSerializableListeners();
-            for(auto& clientListenerPair : *serializableListeners)
+            for(auto& clientListenerPair : serializableListeners)
             {
                 Serializer serializer;
                 if (IClientListener* pClientListener = clientListenerPair.second)
                 {
                     pClientListener->Serialize(serializer);
-                }
-                SerializeSinglePkg(serializer);
+
+					if (!SerializeSinglePkg(serializer))
+					{
+						isSendSucc = false;
+					}
+                }		   				
             }
+			return isSendSucc;
         }
+		return false;
     }
 
-    const bool TCPPackClientService::IsStarted() const
+	bool TCPPackClientService::UnserializeAllPkgs(const uint8_t* pData,const uint32_t iLength)
+	{
+		uint32_t currIndex = 0;
+		while (currIndex < iLength)
+		{
+			PkgHeader* header = (PkgHeader*)(pData + currIndex);
+			uint64_t connID = header->connID;
+			uint32_t bodyType = header->bodyType;
+			uint32_t bodyLen = header->bodyLen;
+			uint32_t pkgLen = bodyLen + sizeof(PkgHeader);
+
+			if (pkgLen <= (iLength - currIndex))
+			{
+				if (IClientListener* pClientListener = mEnv->pSerializerContainer->GetSerializableListener(bodyType))
+				{
+					Serializer unserializer;
+					unserializer.SetPkgBufferData((uint8_t*)header, pkgLen);
+					pClientListener->Unserialize(unserializer);
+				}
+			}
+
+			currIndex += pkgLen;
+		}
+
+		return true;
+	}
+
+	const bool TCPPackClientService::IsStarted() const
     {
-        return m_Start;
+        return m_isStarted;
     }
 
 	const bool TCPPackClientService::IsFinishHandShake() const
 	{
-		return m_FinishHandShake;
+		return m_isFinishHandShake;
 	}
 
 	En_HP_HandleResult __stdcall TCPPackClientService::OnConnect(HP_Client pClient, HP_CONNID dwConnID)
@@ -126,7 +162,7 @@ namespace HPSocket
         int iAddressLen = sizeof(szAddress) / sizeof(TCHAR);
         USHORT usPort;
 
-        if (::HP_Client_GetLocalAddress(m_TCPPackClientService->m_pClient, szAddress, &iAddressLen, &usPort))
+        if (::HP_Client_GetLocalAddress(s_TCPPackClientService->m_client, szAddress, &iAddressLen, &usPort))
         {
             LogAlways("local address: %s#%d", szAddress, usPort);  
         }
@@ -136,7 +172,7 @@ namespace HPSocket
 
 	En_HP_HandleResult __stdcall TCPPackClientService::OnHandShake(HP_Client pSender, HP_CONNID dwConnID)
 	{
-		m_TCPPackClientService->m_FinishHandShake = true;
+		s_TCPPackClientService->m_isFinishHandShake = true;
 		return HR_OK;
 	}
 
@@ -147,28 +183,7 @@ namespace HPSocket
 
     En_HP_HandleResult __stdcall TCPPackClientService::OnReceive(HP_Client pClient, HP_CONNID dwConnID, const BYTE* pData, int iLength)
     {
-        uint32_t currIndex = 0;
-        while (currIndex < iLength)
-        {
-            PkgHeader* header = (PkgHeader*)(pData + currIndex);
-            uint64_t connID = header->connID;
-            uint32_t bodyType = header->bodyType;
-            uint32_t bodyLen = header->bodyLen;
-            uint32_t pkgLen = bodyLen + sizeof(PkgHeader);
-
-            if (pkgLen <= (iLength - currIndex))
-            {
-                if (IClientListener* pClientListener = mEnv->pSerializerContainer->GetUnserializableListener(bodyType))
-                {
-                    Serializer unserializer;
-                    unserializer.SetPkgBufferData((BYTE*)header, pkgLen);
-                    pClientListener->Unserialize(unserializer);
-                }
-            }
-
-            currIndex += pkgLen;
-        }
-
+		s_TCPPackClientService->UnserializeAllPkgs(pData, iLength);	  
         return HR_OK;
     }
 

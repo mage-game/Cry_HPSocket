@@ -17,9 +17,9 @@ public:
 private:
 	void Reset();
 private:
-	std::vector<uint8_t*> m_DataBlocks;
-	uint32_t m_MaxBlockSize;
-	int m_CurEmptyBlockIndex;
-    uint32_t m_CurBlockDataPos;
-    uint32_t m_CurBlockFreeSize;
+	std::vector<uint8_t*> m_dataBlocks;
+	uint32_t m_maxBlockSize;
+	int m_curEmptyBlockIndex;
+    uint32_t m_curBlockDataPos;
+    uint32_t m_curBlockFreeSize;
 };

@@ -45,15 +45,9 @@ namespace HPSocket
 
 		virtual IClientListener* GetSerializableListener(int type) override;
 
-		virtual void RegisterUnserializeListener(IClientListener* pClientListener, int type) override;
-
-		virtual void RemoveUnserializeListener(int type) override;
-
-		virtual IClientListener* GetUnserializableListener(int type) override;
-
-		virtual void SerializeSinglePkgDirectly(Serializer& serializer) override;
+		virtual bool SerializeSinglePkgDirectly(Serializer& serializer) override;
 		// ~IHPSocketPlugin
-	public:
+	private:
 		void RegisterCVars();
 		void UnRegisterCVars();
 	};
